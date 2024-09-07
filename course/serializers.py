@@ -9,7 +9,7 @@ class DepartmentSerializer(serializers.ModelSerializer):
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
-        fields = ['id', 'title', 'description', 'department', 'course_image']
+        fields = ['id', 'title', 'description', 'instructor', 'department', 'course_image', 'is_active']
 
     def create(self, validated_data):
         # Access the request object through context

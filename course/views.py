@@ -54,7 +54,7 @@ class CourseCustomFilter(filters.BaseFilterBackend):
         return queryset
 
 class CoursePagination(pagination.PageNumberPagination):
-    page_size = 12
+    page_size = 9
     page_size_query_param = 'page_size'
     max_page_size = 100
 
