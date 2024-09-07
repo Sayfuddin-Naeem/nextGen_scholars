@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import UserProfile
+from .models import UserProfile, ContactUs
 
 admin.site.site_header = "NextGen Scholars Administration"
 admin.site.site_title = "NextGen Scholars Admin Portal"
@@ -31,3 +31,11 @@ class UserProfileAdmin(admin.ModelAdmin):
     
     def role(self, obj):
         return obj.get_role_display()
+
+@admin.register(ContactUs)
+class ContactUsAdmin(admin.ModelAdmin):
+    list_display = ['message_by', 'email', 'message']
+    
+    def message_by(self, obj):
+        return obj.name
+    message_by.short_description = 'Messaged By'

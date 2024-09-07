@@ -2,6 +2,7 @@ from rest_framework import status, permissions
 from rest_framework.decorators import permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.generics import CreateAPIView
 from rest_framework import viewsets, filters
 from rest_framework.permissions import IsAuthenticated
 # For Token and Unique confirmation url genarate
@@ -17,6 +18,7 @@ from .constants import TEACHER, STUDENT
 from .serializers import *
 from .utils import send_email, generate_confirmation_link
 from .permission import IsStudent, IsTeacher
+from .models import ContactUs
 
 
 class StudentById(filters.BaseFilterBackend):
@@ -155,3 +157,8 @@ class PasswordUpdateApiView(APIView):
             serializer.update(user, serializer.validated_data)
             return Response({"detail": "Password updated successfully."}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ContactUsCreateView(CreateAPIView):
+    queryset = ContactUs.objects.all()
+    serializer_class = ContactUsSerializer

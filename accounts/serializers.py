@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
+from .models import ContactUs
 
 
 class UserLoginSerializer(serializers.Serializer):
@@ -45,3 +46,8 @@ class PasswordUpdateSerializer(serializers.Serializer):
         instance.set_password(new_password)
         instance.save()
         return instance
+
+class ContactUsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContactUs
+        fields = '__all__'

@@ -17,7 +17,7 @@ class Course(models.Model):
     description = models.TextField()
     department  = models.ForeignKey(Department, on_delete=models.CASCADE)
     instructor  = models.ForeignKey(Teacher, related_name='courses', on_delete=models.CASCADE)
-    course_image= models.ImageField(upload_to=get_upload_to, blank=True)
+    course_image= models.ImageField(upload_to=get_upload_to, default='course/images/default_course.png')
     created_at  = models.DateTimeField(auto_now_add=True)
     updated_at  = models.DateTimeField(auto_now=True)
     is_active   = models.BooleanField(default=True)
