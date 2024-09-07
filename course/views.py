@@ -11,28 +11,35 @@ from .serializers import *
 
 # Create your views here.
 
-class DepartmentById(filters.BaseFilterBackend):
+class DepartmentCustomFilter(filters.BaseFilterBackend):
     def filter_queryset(self, request, query_set, view):
         dept_id = request.query_params.get("id")
+        dept_slug = request.query_params.get("slug")
         if dept_id:
             return query_set.filter(id = dept_id)
+        if dept_slug:
+            return query_set.filter(slug = dept_slug)
         return query_set
 
 class DepartmentReadOnlyViewset(ReadOnlyModelViewSet):
     queryset = Department.objects.all()
     serializer_class = DepartmentSerializer
-    filter_backends = [DepartmentById]
+    filter_backends = [DepartmentCustomFilter]
 
 class CourseCustomFilter(filters.BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         course_id = request.query_params.get("course_id")
         dept_id = request.query_params.get("dept_id")
+        dept_slug = request.query_params.get("dept_slug")
         teacher_id = request.query_params.get("teacher_id")
 
         if course_id:
             queryset = queryset.filter(id=course_id)
         if dept_id:
             queryset = queryset.filter(department__id=dept_id)
+            
+        if dept_slug:
+            queryset = queryset.filter(department__slug=dept_slug)
 
         # Apply filtering by teacher_id only if the authenticated user is an instructor
         if teacher_id and request.user.is_authenticated:

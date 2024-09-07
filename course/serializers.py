@@ -4,7 +4,7 @@ from .models import *
 class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Department
-        fields = ['id', 'name']
+        fields = '__all__'
 
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:
