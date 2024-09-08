@@ -19,6 +19,10 @@ class Teacher(models.Model):
     designation = models.ForeignKey(Designation, on_delete=models.SET_NULL, null=True, blank=True)
     bio = models.TextField(blank=True)
     specializations = models.ManyToManyField(Specialization)
+    
+    @property
+    def full_name(self):
+        return f"{self.profile.user.first_name} {self.profile.user.last_name}"
 
     def __str__(self):
         return f"{self.profile.user.username} - {self.designation}"

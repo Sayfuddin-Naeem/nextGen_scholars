@@ -1,5 +1,6 @@
 from rest_framework  import serializers
 from .models import *
+from teacher.models import Teacher
 
 class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -7,6 +8,9 @@ class DepartmentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class CourseSerializer(serializers.ModelSerializer):
+    department = serializers.SlugRelatedField(queryset=Department.objects.all(), slug_field='name', required=True)
+    instructor = serializers.SlugRelatedField(queryset=Teacher.objects.all(), slug_field='full_name', required=True)
+    
     class Meta:
         model = Course
         fields = ['id', 'title', 'description', 'instructor', 'department', 'course_image', 'is_active']
