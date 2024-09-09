@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from accounts.models import UserProfile
 from course.models import Department
 from accounts.constants import TEACHER
+from django.db import transaction
 from .models import *
 
 
@@ -39,40 +40,56 @@ class TeacherSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Email already exists.")
         return data
 
+    @transaction.atomic
     def create(self, validated_data):
-        profile_data = validated_data.pop('profile')
-        teacher_data = profile_data.pop('teacher')
-        validated_data.pop('confirm_password')
+        # Using transaction.atomic to ensure atomicity
+        try:
+            # Extract profile and teacher data from validated_data
+            profile_data = validated_data.pop('profile')
+            teacher_data = profile_data.pop('teacher')
 
-        user = User(
-            username    = validated_data['username'],
-            first_name  = validated_data['first_name'],
-            last_name   = validated_data['last_name'],
-            email       = validated_data['email']
-        )
-        user.set_password(validated_data['password'])
-        user.is_active = False
-        user.save()
+            # Remove confirm_password from the data since it's not a model field
+            validated_data.pop('confirm_password')
 
-        profile = UserProfile(
-            user            = user,
-            date_of_birth   = profile_data['date_of_birth'],
-            department      = profile_data['department'],
-            profile_picture = profile_data.get('profile_picture', None),
-            phone_number    = profile_data['phone_number'],
-            role            = TEACHER,
-        )
-        profile.save()
+            # User creation
+            user = User(
+                username    = validated_data['username'],
+                first_name  = validated_data['first_name'],
+                last_name   = validated_data['last_name'],
+                email       = validated_data['email']
+            )
+            user.set_password(validated_data['password'])
+            user.is_active = False  # Set to False until email verification
+            user.save()
 
-        teacher = Teacher(
-            profile     = profile,
-            bio         = teacher_data.get('bio', ''),
-            designation = teacher_data.get('designation', None),
-        )
-        teacher.save()
-        teacher.specializations.set(teacher_data['specializations'])
+            # UserProfile creation
+            profile = UserProfile(
+                user            = user,
+                date_of_birth   = profile_data['date_of_birth'],
+                department      = profile_data['department'],
+                profile_picture = profile_data.get('profile_picture', None),
+                phone_number    = profile_data['phone_number'],
+                role            = TEACHER,
+            )
+            profile.save()
 
-        return user
+            # Teacher creation
+            teacher = Teacher(
+                profile     = profile,
+                bio         = teacher_data.get('bio', ''),
+                designation = teacher_data.get('designation', None),
+            )
+            teacher.save()
+
+            # Setting many-to-many field for teacher's specializations
+            teacher.specializations.set(teacher_data['specializations'])
+
+            return user
+
+        except Exception as e:
+            # If any error occurs during the transaction, it will roll back
+            raise serializers.ValidationError(f"Error occurred during user creation: {str(e)}")
+
     
     def update(self, instance, validated_data):
         profile_data = validated_data.pop('profile')

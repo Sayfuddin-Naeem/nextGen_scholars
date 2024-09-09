@@ -4,6 +4,7 @@ from .models import Student
 from accounts.models import UserProfile
 from course.models import Department
 from accounts.constants import STUDENT
+from django.db import transaction
 
 
 class StudentSerializer(serializers.ModelSerializer):
@@ -28,45 +29,52 @@ class StudentSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Email already exists.")
         return data
 
+    @transaction.atomic
     def create(self, validated_data):
-        # Extract profile and student data from validated_data
-        profile_data = validated_data.pop('profile')
-        student_data = profile_data.pop('student')
-        
-        # Remove confirm_password from the data since it's not a model field
-        validated_data.pop('confirm_password')
+        # Using transaction.atomic to ensure atomicity
+        try:
+            # Extract profile and student data from validated_data
+            profile_data = validated_data.pop('profile')
+            student_data = profile_data.pop('student')
+            
+            # Remove confirm_password from the data since it's not a model field
+            validated_data.pop('confirm_password')
 
-        # User creation
-        user = User(
-            username    = validated_data['username'],
-            first_name  = validated_data['first_name'],
-            last_name   = validated_data['last_name'],
-            email       = validated_data['email']
-        )
-        user.set_password(validated_data['password'])
-        user.is_active = False  # Set to False until email verification
-        user.save()
+            # User creation
+            user = User(
+                username    = validated_data['username'],
+                first_name  = validated_data['first_name'],
+                last_name   = validated_data['last_name'],
+                email       = validated_data['email']
+            )
+            user.set_password(validated_data['password'])
+            user.is_active = False  # Set to False until email verification
+            user.save()
 
-        # UserProfile creation
-        profile = UserProfile(
-            user            = user,
-            date_of_birth   = profile_data['date_of_birth'],
-            department      = profile_data['department'],
-            profile_picture = profile_data.get('profile_picture', None),
-            phone_number    = profile_data['phone_number'],
-            role            = STUDENT,
-        )
-        profile.save()
+            # UserProfile creation
+            profile = UserProfile(
+                user            = user,
+                date_of_birth   = profile_data['date_of_birth'],
+                department      = profile_data['department'],
+                profile_picture = profile_data.get('profile_picture', None),
+                phone_number    = profile_data['phone_number'],
+                role            = STUDENT,
+            )
+            profile.save()
 
-        # Student creation
-        student = Student(
-            profile      = profile,
-            student_id   = 10000 + user.id,
-            year_of_study= student_data['year_of_study']
-        )
-        student.save()
+            # Student creation
+            student = Student(
+                profile      = profile,
+                student_id   = 10000 + user.id,
+                year_of_study= student_data['year_of_study']
+            )
+            student.save()
 
-        return user
+            return user
+
+        except Exception as e:
+            # If any error occurs during the transaction, it will roll back
+            raise serializers.ValidationError(f"Error occurred during user creation: {str(e)}")
     
     def update(self, instance, validated_data):
         # Extract profile and student data from validated_data
