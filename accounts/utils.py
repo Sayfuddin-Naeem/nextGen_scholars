@@ -14,7 +14,7 @@ def get_upload_to(instance, filename):
 def generate_confirmation_link(user):
     token = default_token_generator.make_token(user)
     uid = urlsafe_base64_encode(force_bytes(user.pk))
-    confirm_link = f"http://127.0.0.1:9000/user/activate?uid64={uid}&token={token}"
+    confirm_link = f"http://127.0.0.1:9000/user/activate/?uid64={uid}&token={token}"
     
     return confirm_link
 

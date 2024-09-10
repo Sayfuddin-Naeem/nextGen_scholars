@@ -96,7 +96,7 @@ class TeacherViewSet(viewsets.ModelViewSet):
 def activate(request, uid64, token):
     try:
         uid = urlsafe_base64_decode(uid64).decode()
-        user = User.objects.get(pk=uid)
+        user = User._default_manager.get(pk=uid)
     except (User.DoesNotExist, ValueError, TypeError, OverflowError):
         return Response({'error': 'Invalid activation link'}, status=status.HTTP_400_BAD_REQUEST)
 
