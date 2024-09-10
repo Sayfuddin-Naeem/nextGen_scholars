@@ -1,6 +1,7 @@
 from rest_framework import status, permissions
-from rest_framework.decorators import permission_classes
+from rest_framework.decorators import permission_classes, api_view
 from rest_framework.response import Response
+from django.http import JsonResponse
 from rest_framework.views import APIView
 from rest_framework.generics import CreateAPIView
 from rest_framework import viewsets, filters
@@ -91,24 +92,21 @@ class TeacherViewSet(viewsets.ModelViewSet):
             return Response({'message': 'Check Your Mail for Confirmation', 'user_id': user.id}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-
+@api_view(['GET'])
 def activate(request, uid64, token):
     try:
         uid = urlsafe_base64_decode(uid64).decode()
-        user = User._default_manager.get(pk=uid)
-    except(User.DoesNotExist):
-        user = None
-    
+        user = User.objects.get(pk=uid)
+    except (User.DoesNotExist, ValueError, TypeError, OverflowError):
+        return Response({'error': 'Invalid activation link'}, status=status.HTTP_400_BAD_REQUEST)
+
     if user is not None and default_token_generator.check_token(user, token):
         user.is_active = True
         user.save()
-        
-        return redirect('login')
-        
-    if user.profile.role == STUDENT:
-        return redirect('student')
-    return redirect('teacher')
+        return Response({'message': 'Account activated successfully'}, status=status.HTTP_200_OK)
+    else:
+        return Response({'error': 'Activation failed'}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class UserLoginApiView(APIView):
     def post(self, request):
