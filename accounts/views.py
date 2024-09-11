@@ -145,10 +145,16 @@ class UserLoginApiView(APIView):
 
 class UserLogoutApiView(APIView):
     permission_classes = [IsAuthenticated]
+
     def get(self, request):
+        # Delete the token to log the user out
         request.user.auth_token.delete()
+        
+        # Perform logout
         logout(request)
-        return redirect('login')
+        
+        # Return a JSON response to confirm successful logout
+        return Response({"message": "Logout successful."}, status=status.HTTP_200_OK)
 
 class PasswordUpdateApiView(APIView):
     permission_classes = [IsAuthenticated]
