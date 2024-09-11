@@ -129,11 +129,16 @@ class UserLoginApiView(APIView):
                     return Response({
                         'token': token.key,
                         'user_id': user.id,
+                        'user_type': user.profile.role,
                         'redirect_url': request.build_absolute_uri(admin_url)
                     }, status=status.HTTP_200_OK)
                 else:
                     # For non-admin users, return the usual response
-                    return Response({'token': token.key, 'user_id': user.id}, status=status.HTTP_200_OK)
+                    return Response({
+                        'token': token.key,
+                        'user_id': user.id,
+                        'user_type': user.profile.role,
+                        }, status=status.HTTP_200_OK)
             else:
                 return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
