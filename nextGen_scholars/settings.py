@@ -76,7 +76,7 @@ CORS_ALLOWED_ORIGINS = [
     # "http://localhost:8000",
     "http://127.0.0.1:9000",   
     "http://localhost:9000",
-    "https://nextgen-scholars.onrender.com"
+    # "https://nextgen-scholars.onrender.com"
 ]
 
 CORS_ALLOW_HEADERS = [
@@ -117,19 +117,19 @@ WSGI_APPLICATION = 'nextGen_scholars.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
 DATABASES = {
-    'default': dj_database_url.config(
-        # Replace this value with your local database's connection string.
-        default='postgresql://nextgen_scholars_user:nG1syAUr7DmmvDtcJoJ8dm4I5AF4ieFC@dpg-cr9frq3v2p9s73b747e0-a.oregon-postgres.render.com/nextgen_scholars',
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
+
+# DATABASES = {
+#     'default': dj_database_url.config(
+#         # Replace this value with your local database's connection string.
+#         default='postgresql://nextgen_scholars_user:nG1syAUr7DmmvDtcJoJ8dm4I5AF4ieFC@dpg-cr9frq3v2p9s73b747e0-a.oregon-postgres.render.com/nextgen_scholars',
+#     )
+# }
 
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
